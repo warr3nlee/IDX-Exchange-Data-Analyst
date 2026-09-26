@@ -1,0 +1,1 @@
+print("IDX Exchange Data Analyst environment ready.")
