@@ -16,3 +16,7 @@ venv/
 .DS_Store
 Thumbs.db
 .vscode/
+
+src/crmls_listed.py
+
+src/crmls_sold.py
