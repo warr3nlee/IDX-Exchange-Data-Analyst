@@ -1,0 +1,18 @@
+# Confidential internship data
+data/raw/
+data/processed/
+*.csv
+
+# Python cache / environments
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS/editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
