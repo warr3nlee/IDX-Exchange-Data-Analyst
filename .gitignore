@@ -3,6 +3,9 @@ data/raw/
 data/processed/
 *.csv
 
+# Private internship reference materials
+docs/handbooks/
+
 # Python cache / environments
 __pycache__/
 *.pyc
