@@ -29,7 +29,7 @@ OUTPUT_FILENAMES = {
 }
 
 START_MONTH = "202401"
-END_MONTH = "202608"
+END_MONTH = "202609"
 
 LISTING_PATTERN = re.compile(r"CRMLSListing(?P<month>\d{6})\.csv")
 SOLD_PATTERN = re.compile(
@@ -48,6 +48,7 @@ class CsvAudit:
     header: tuple[str, ...] = ()
     row_count: int = 0
     residential_count: int = 0
+    property_type_counts: Counter[str] = field(default_factory=Counter)
     width_errors: list[tuple[int, int, int, int]] = field(default_factory=list)
     duplicate_columns: dict[str, tuple[int, ...]] = field(default_factory=dict)
     duplicate_mismatches: Counter[str] = field(default_factory=Counter)
@@ -168,7 +169,13 @@ def inspect_csv(
                     )
 
                 if property_positions and property_positions[0] < len(row):
-                    if row[property_positions[0]].strip() == "Residential":
+                    property_type = (
+                        row[property_positions[0]]
+                    ).strip()
+                    audit.property_type_counts[
+                        property_type or "<blank>"
+                    ] += 1
+                    if property_type == "Residential":
                         audit.residential_count += 1
 
                 for column, indexes in audit.duplicate_columns.items():
@@ -460,6 +467,46 @@ def print_source_counts(audits: list[CsvAudit], dataset: str) -> None:
     )
 
 
+def property_type_summary(
+    audits: list[CsvAudit],
+    dataset: str,
+) -> pd.DataFrame:
+    """Return aggregate pre-filter property-type counts and shares."""
+
+    counts: Counter[str] = Counter()
+    for audit in audits:
+        if audit.dataset == dataset:
+            counts.update(audit.property_type_counts)
+
+    total = sum(counts.values())
+    rows = [
+        {
+            "property_type": property_type,
+            "record_count": count,
+            "share_percent": count / total * 100 if total else 0.0,
+        }
+        for property_type, count in counts.most_common()
+    ]
+
+    return pd.DataFrame(rows)
+
+
+def print_property_type_summary(
+    audits: list[CsvAudit],
+    dataset: str,
+) -> None:
+    """Print safe pre-filter property-type counts and shares."""
+
+    report = property_type_summary(audits, dataset)
+    print(f"\n{dataset.upper()} PROPERTY TYPES BEFORE FILTERING")
+
+    for row in report.itertuples():
+        print(
+            f"  {row.property_type}: {row.record_count:,} "
+            f"({row.share_percent:.2f}%)"
+        )
+
+
 def print_schema_summary(audits: list[CsvAudit], dataset: str) -> None:
     """Describe exact ordered-header groups and their differences."""
 
@@ -542,6 +589,8 @@ def main() -> int:
 
     print_source_counts(audits, "listings")
     print_source_counts(audits, "sold")
+    print_property_type_summary(audits, "listings")
+    print_property_type_summary(audits, "sold")
     print_schema_summary(audits, "listings")
     print_schema_summary(audits, "sold")
     print_filled_coordinate_summary(audits)

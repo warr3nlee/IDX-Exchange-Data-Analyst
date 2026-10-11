@@ -54,3 +54,41 @@
 - Next-session resume point: save reusable missingness and numeric summary outputs, create confidentiality-safe distribution plots, review property-category values and filtering logic, and test date consistency.
 - Later Weeks 2–3 work also includes obtaining the approved FRED mortgage-rate series, converting it to the project month key, merging it into the MLS analysis data, validating the join, and documenting the enriched outputs.
 - Validation commands for this checkpoint: `.venv/bin/python -m py_compile src/weeks2_3_validate.py` followed by `.venv/bin/python src/weeks2_3_validate.py`.
+
+## 2026-10-10
+- Established `notebooks/` as the long-term analytical narrative for the internship rather than treating notebooks as one-time meeting artifacts.
+- Aligned the notebook roadmap with the handbook phases from Week 0 through the final Weeks 11–12 deliverables.
+- Added `notebooks/README.md` with the project notebook index, standard chapter structure, execution workflow, and confidentiality rules.
+- Backfilled `00_pipeline_orientation.ipynb` to document data lineage, coverage, and privacy boundaries.
+- Backfilled `01_monthly_aggregation.ipynb` to document Week 1 aggregation results, the January 2026 recovery, schema evolution, duplicate headers, coordinate preservation, and lineage decisions.
+- Added and completed `02_03_data_validation_eda.ipynb` with reusable imports, safe aggregate tables, missingness plots, capped numeric distributions, written findings, decisions, and supervisor questions.
+- Declared Jupyter, kernel, notebook-format, and visualization dependencies in `requirements.txt` and installed them in the project virtual environment.
+- Validated all four notebooks against the notebook schema and compiled every Python cell.
+- Executed all four notebooks successfully using temporary output files; repository copies remain free of saved output.
+- Confirmed the notebooks and both reports contain no credential-related terms and no row-level MLS output.
+- Rechecked the Week 0 through Weeks 2–3 work against the private project handbook and the Trestle property metadata reference instead of relying on the earlier working summary.
+- Found that September 2026 was the latest completed calendar month as of the review date and therefore was required by the Week 1 rolling-coverage rule.
+- Updated the private, Git-ignored listing and sold extraction scripts for the September 2026 window and generated the missing source files locally.
+- Validated 35,047 September listing records and 22,178 September sold records. The listing extract contained 22,281 Residential records; the sold extract contained 14,848 Residential records. Both files passed structural and final-line checks.
+- Extended `src/week1_aggregate.py` through September 2026 and added a pre-filter property-type audit so the Residential filter is measurable rather than assumed.
+- Rebuilt the private combined datasets from 33 monthly files covering January 2024 through September 2026.
+- Combined 1,031,314 listing records and filtered them to 655,943 Residential records. Combined 736,548 sold records and filtered them to 495,334 Residential records.
+- Confirmed the rebuilt outputs contain all 33 expected source months, zero non-Residential rows, 75 listing columns, and 86 sold columns.
+- Measured the effect of the Residential filter: Residential represents 63.60% of the pre-filter listing records and 67.25% of the pre-filter sold records. ResidentialLease is the second-largest type at 20.78% and 23.01%, respectively.
+- Extended `src/weeks2_3_validate.py` to classify field roles, attach retain/exclude recommendations to missingness results, summarize Residential subtypes, measure repeated identifiers without exposing their values, test preliminary date consistency, and answer aggregate sold-market questions.
+- Re-ran missingness checks on the September-complete data. Listings contain missing values in 63 of 75 columns and 13 fields above 90% missing; sold contains missing values in 74 of 86 columns and 15 fields above 90% missing.
+- Retained the decision not to delete sparse columns from the private master datasets. Fields that are 100% missing are excluded from current analyses, fields above 90% missing are reviewed per use case, and core analytical fields are retained with their valid denominators reported.
+- Completed the handbook's nine-field numeric analysis for `ClosePrice`, `ListPrice`, `OriginalListPrice`, `LivingArea`, `LotSizeAcres`, `BedroomsTotal`, `BathroomsTotalInteger`, `DaysOnMarket`, and `YearBuilt`, including percentiles, histograms, boxplots, and full-range extreme checks.
+- Updated central estimates: listings median ListPrice is $840,000, median LivingArea is 1,671 square feet, and median DaysOnMarket is 11; sold median ClosePrice is $825,000, median LivingArea is 1,648 square feet, and median DaysOnMarket is 19.
+- Confirmed SingleFamilyResidence is the dominant Residential subtype: 478,767 listing records (72.99%) and 371,242 sold records (74.95%). Condominiums and townhouses are the next-largest groups.
+- Found repeated identifiers at low frequency without printing the identifiers: 199 repeated `ListingKey` values across 400 listing records and 376 repeated keys across 756 sold records. The analytical grain and deduplication rule remain a Weeks 4–5 decision.
+- Added preliminary chronology checks based on Trestle field definitions. Observed violation rates are below 0.13% for listing-after-purchase, purchase-after-close, and listing-after-close comparisons, but the rules still require formalization in Weeks 4–5.
+- Measured sold price outcomes among records with valid positive current list prices: 39.62% sold above list, 17.44% at list, and 42.94% below list. Documented that this comparison uses current `ListPrice`, not `OriginalListPrice`.
+- Added county-level median close-price summaries with a minimum of 100 sold records and documented that these are unadjusted descriptive comparisons affected by property mix and time period.
+- Added `src/weeks2_3_mortgage.py` following the handbook method: retrieve FRED series `MORTGAGE30US`, average weekly observations by month, join listings by `ListingContractDate` month, and join sold records by `CloseDate` month.
+- Validated both mortgage joins as many-to-one left joins. Row counts remained 655,943 listings and 495,334 sold records, all 33 months were retained, and both enriched datasets have zero missing mortgage rates.
+- Saved the two enriched CSV outputs under `data/processed/`; both remain private and excluded from Git.
+- Completed `02_03_data_validation_eda.ipynb` and added `02_03_mortgage_enrichment.ipynb`. Both notebooks use aggregate-only outputs and place reusable processing logic in `src/`.
+- Updated the orientation notebook with the core Trestle metadata definitions and updated the aggregation notebook with September coverage and the property-type filtering audit.
+- Added `reports/weeks2_3_final_report.md` as the supervisor-facing final summary and marked the earlier checkpoint report as a historical, superseded snapshot.
+- Weeks 2–3 are complete against the handbook. The next phase is Weeks 4–5: define explicit cleaning rules and flags, quantify their effects, and decide the correct treatment of repeated listing identifiers before calculating final market metrics.
