@@ -12,7 +12,7 @@ Reusable processing logic belongs in `src/`. Private MLS data belongs in `data/`
 | `01_monthly_aggregation.ipynb` | Week 1 – Monthly Dataset Aggregation | Backfilled |
 | `02_03_data_validation_eda.ipynb` | Weeks 2–3 – Dataset Structuring and Validation | Complete |
 | `02_03_mortgage_enrichment.ipynb` | Weeks 2–3 – Mortgage Rate Enrichment | Complete |
-| `04_05_cleaning_preparation.ipynb` | Weeks 4–5 – Data Cleaning and Preparation | Planned |
+| `04_05_cleaning_preparation.ipynb` | Weeks 4–5 – Data Cleaning and Preparation | Complete |
 | `06_market_metrics.ipynb` | Week 6 – Feature Engineering and Market Metrics | Planned |
 | `07_outlier_detection.ipynb` | Week 7 – Outlier Detection and Data Quality | Planned |
 | `08_10_tableau_development.ipynb` | Weeks 8–10 – Tableau Dashboard Development | Planned |

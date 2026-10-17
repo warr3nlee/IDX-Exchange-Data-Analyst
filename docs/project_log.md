@@ -92,3 +92,29 @@
 - Updated the orientation notebook with the core Trestle metadata definitions and updated the aggregation notebook with September coverage and the property-type filtering audit.
 - Added `reports/weeks2_3_final_report.md` as the supervisor-facing final summary and marked the earlier checkpoint report as a historical, superseded snapshot.
 - Weeks 2–3 are complete against the handbook. The next phase is Weeks 4–5: define explicit cleaning rules and flags, quantify their effects, and decide the correct treatment of repeated listing identifiers before calculating final market metrics.
+
+## 2026-10-17
+- Re-read the private internship handbook and used its exact Weeks 4–5 requirements as the cleaning specification.
+- Added `src/weeks4_5_clean.py` as the reproducible cleaning and preparation deliverable.
+- Used the mortgage-enriched Residential datasets as inputs so the Week 2–3 `year_month` and `rate_30yr_fixed` fields remain available for later analysis.
+- Standardized `CloseDate`, `PurchaseContractDate`, `ListingContractDate`, and `ContractStatusChangeDate` as datetime values and saved them in ISO `YYYY-MM-DD` format.
+- Confirmed zero nonblank date parse failures across both datasets.
+- Converted and validated 21 analytical numeric fields covering prices, areas, lots, rooms, days on market, year built, parking/garage measures, coordinates, and mortgage rates.
+- Confirmed zero numeric coercion failures across both datasets.
+- Removed eight 100%-missing fields from each analysis-ready copy: `AboveGradeFinishedArea`, `BusinessType`, `CoveredSpaces`, `ElementarySchoolDistrict`, `FireplacesTotal`, `MiddleOrJuniorSchoolDistrict`, `TaxAnnualAmount`, and `TaxYear`.
+- Removed twelve unnecessary row-level address, agent-name, agent-ID, and contact fields from the analysis-ready copies while retaining them in the unchanged private source files.
+- Retained `ListOfficeName` and `BuyerOfficeName` because the Week 6 handbook requires office-level segment analysis.
+- Chose not to impute optional missing values because the handbook and metadata do not provide defensible replacement rules.
+- Added the required date flags with explicit definitions: listing after close, purchase contract after close, and purchase contract before listing (`negative_timeline_flag`).
+- Date-flag counts are low: listings have 88 listing-after-close, 264 purchase-after-close, and 320 negative-timeline records; sold has 75, 243, and 316, respectively.
+- Added the required invalid-numeric flags for nonpositive close price, nonpositive living area, negative days on market, negative bedrooms, and negative bathrooms.
+- Flagged 459 listing records (0.070%) and 234 sold records (0.047%) under at least one required numeric rule. No invalid rows were silently deleted.
+- Added geographic flags for missing coordinates, zero coordinates, positive longitude, a broad California bounding-box screen, and a combined invalid-coordinate indicator.
+- Found missing coordinates are the dominant geographic issue: 81,364 listing records (12.404%) and 4,797 sold records (0.968%).
+- The combined coordinate flag affects 81,725 listing records (12.459%) and 4,912 sold records (0.992%).
+- Preserved all rows: listings remained 655,943 before and after cleaning, while sold remained 495,334 before and after.
+- Saved the private outputs as `data/processed/analysis_ready_listings_residential.csv` (74 columns) and `data/processed/analysis_ready_sold_residential.csv` (85 columns).
+- Independently read both saved outputs and confirmed exact row counts, 33 source months, Residential-only scope, zero all-null columns, zero removed sensitive fields, all 17 flags present with no null flag values, and zero malformed saved dates.
+- Added `notebooks/04_05_cleaning_preparation.ipynb` with the handbook checklist, reproducible workflow, aggregate review tables, coordinate-quality visualization, decisions, and supervisor questions.
+- Added `reports/weeks4_5_cleaning_report.md` as the supervisor-facing final Weeks 4–5 summary.
+- Weeks 4–5 are complete against the handbook. The next phase is Week 6 feature engineering and market metrics, using the quality flags to define eligibility for each calculation.
