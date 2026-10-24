@@ -118,3 +118,84 @@
 - Added `notebooks/04_05_cleaning_preparation.ipynb` with the handbook checklist, reproducible workflow, aggregate review tables, coordinate-quality visualization, decisions, and supervisor questions.
 - Added `reports/weeks4_5_cleaning_report.md` as the supervisor-facing final Weeks 4–5 summary.
 - Weeks 4–5 are complete against the handbook. The next phase is Week 6 feature engineering and market metrics, using the quality flags to define eligibility for each calculation.
+
+## 2026-10-24
+- Started Week 6 feature engineering with an analyst-led decision process: each metric will be defined and interpreted before the next metric is added.
+- Chose the sold dataset as the primary table for close-dependent metrics because listing records do not necessarily have a completed sale, `ClosePrice`, or `CloseDate`.
+- Defined the first metric as `close_to_original_list_ratio = ClosePrice / OriginalListPrice`.
+- Agreed that the ratio is calculated only when both prices are present and strictly positive. All other records remain in the dataset with a missing ratio rather than receiving a misleading value or being deleted.
+- Defined the interpretation before implementation: below 1 means the property closed below its original list price, exactly 1 means it closed at its original list price, and above 1 means it closed above its original list price.
+- Added `src/week6_features.py` as the reusable implementation and validation record for the first Week 6 metric.
+- Used `data/processed/analysis_ready_sold_residential.csv` as the private input and saved the private output as `data/processed/market_metrics_sold_residential.csv`.
+- Preserved all 495,334 sold records and added exactly one new column. The saved output contains 86 columns.
+- Found 494,426 eligible records (99.82%) and 908 ineligible records (0.18%). The ineligible reasons overlap: 2 records have missing `ClosePrice`, 1 has nonpositive `ClosePrice`, 903 have missing `OriginalListPrice`, and 2 have nonpositive `OriginalListPrice`.
+- Among eligible records, 254,515 (51.48%) closed below original list price, 57,304 (11.59%) closed at original list price, and 182,607 (36.93%) closed above original list price.
+- The median ratio is 0.9944, while the mean is 50.6149. The central 1st-to-99th-percentile range is 0.7467 to 1.2857, but the full maximum is approximately 9,118,000.
+- Treated the extreme ratio values as a data-quality discovery, not a reason for silent deletion. They remain in the private dataset for formal Week 7 outlier investigation; percentile-based summaries and the median are safer for the current descriptive discussion.
+- Independently reloaded the saved CSV and verified the row count, column count, formula, eligibility handling, and numerical precision.
+- Added `notebooks/06_market_metrics.ipynb` with the agreed definition, reproducible calculation, aggregate eligibility and outcome tables, a central-distribution plot, and analyst interpretation prompts. No raw MLS rows or confidential identifiers are displayed.
+- Clarified the analyst interpretation of the first metric: the median ratio of 0.9944 means the typical eligible property closed at 99.44% of original list price, approximately 0.56% below it; it does not mean most sales were unchanged.
+- Reviewed the handbook before metric 2 and found that “Price Ratio” and “Close to Original List Ratio” are listed separately with the same formula. One `close_to_original_list_ratio` column satisfies both definitions without creating a duplicate.
+- Defined the second distinct metric as `close_price_per_sqft = ClosePrice / LivingArea` on the sold dataset.
+- Agreed that PPSF is calculated only when both `ClosePrice` and `LivingArea` are present and strictly positive. Ineligible records remain in the dataset with a missing PPSF.
+- Recorded the analyst interpretation boundary: higher PPSF means more was paid per square foot, but MLS data alone does not establish that safety, education, retail access, or another neighborhood factor caused the difference.
+- Found 494,880 PPSF-eligible records (99.91%) and 454 ineligible records (0.09%). Overlapping ineligibility reasons are 2 missing close prices, 1 nonpositive close price, 274 missing living-area values, and 177 nonpositive living-area values.
+- The median PPSF is $535.98 and the mean is $641.13. The central 1st-to-99th-percentile range is $160.13 to $1,896.63; the maximum is approximately $1.164 million per square foot and remains preserved for Week 7 review.
+- Rebuilt and independently validated the private Week 6 CSV with all 495,334 rows and both engineered metric columns.
+- Updated and restructured `notebooks/06_market_metrics.ipynb` to compare eligibility and distributions for both metrics and to preserve the analyst's interpretation and open questions.
+- Confirmed the handbook's third distinct metric, Days on Market, uses the existing raw `DaysOnMarket` field. No duplicate column was created.
+- Defined valid Days on Market values as present and nonnegative. Zero-day records are valid; negative values remain preserved with the existing `invalid_days_on_market_flag` but are excluded from metric summaries.
+- Revalidated the Week 4–5 flag against the raw values and found exact agreement for all records.
+- Found 495,278 eligible records (99.99%), 56 negative ineligible values, zero missing values, and 20,011 valid zero-day records.
+- Among eligible records, median Days on Market is 19 days and mean Days on Market is 37.65 days. The 1st-to-99th-percentile range is 0 to 235 days, while the maximum is 12,430 days.
+- Preserved the extreme maximum for formal Week 7 investigation rather than silently deleting it. The large mean-to-median difference indicates a strongly right-skewed distribution.
+- Updated the Week 6 notebook with a third eligibility row, a Days on Market quality table, its central-distribution chart, and analyst interpretation questions.
+- Refined the Days on Market interpretation: a 19-day median means half of eligible sold records have 19 days or less and half have 19 days or more; it is not the same as the 37.65-day average.
+- Defined the fourth metric group as Year, Month, and YrMo derived from `CloseDate` for chronological analysis.
+- Recorded the analyst rationale that calendar month alone would mix the same month across different years even though market behavior can change year over year.
+- Found the existing mortgage-enrichment `year_month` field already equals `CloseDate` in `YYYY-MM` format for every record. Reused it as the handbook's YrMo rather than creating a duplicate.
+- Added `close_year` and `close_month` as the only new time columns and validated them after saving and reloading the CSV.
+- Confirmed all 495,334 sold records have a valid `CloseDate`, zero parse errors, and complete 33-month coverage from `2024-01` through `2026-09`.
+- The private Week 6 output now contains 89 columns: the 85 Weeks 4–5 columns plus the ratio, PPSF, close year, and close month. All rows remain preserved.
+- Updated the Week 6 notebook with time-field eligibility, coverage validation, the reuse decision, and the analyst's year-over-year interpretation.
+- Clarified the fifth metric's business dates: `ListingContractDate` starts the listing relationship, while `PurchaseContractDate` marks an accepted buyer offer; it does not necessarily mean the original asking price was accepted.
+- Defined `listing_to_contract_days = PurchaseContractDate - ListingContractDate` and calculated it only when both dates exist and the result is nonnegative.
+- Preserved missing and negative-timeline records with a blank derived metric. Revalidated the existing `negative_timeline_flag` against the two source dates with exact agreement.
+- Found 494,820 eligible records (99.90%) and 514 ineligible records. Overlapping reasons include 1 missing listing date, 197 missing purchase-contract dates, and 316 negative timelines.
+- Among eligible records, median listing-to-contract time is 25 days and mean time is 45.65 days. The 1st-to-99th-percentile range is 0 to 279 days, and 11,169 valid records have a zero-day difference.
+- Preserved the 14,657-day maximum for Week 7 investigation rather than deleting it during feature engineering.
+- The private Week 6 output now contains 90 columns and still preserves all 495,334 sold records.
+- Updated the Week 6 notebook with metric eligibility, source-date quality counts, a central-distribution chart, and analyst interpretation prompts for listing-to-contract time.
+- Refined the listing-to-contract interpretation: a 25-day median means half of eligible records reached an accepted purchase contract within 25 days of listing and half took 25 days or longer.
+- Defined the sixth metric as `contract_to_close_days = CloseDate - PurchaseContractDate`.
+- Recorded the analyst interpretation that this measures time to complete the transaction after an accepted offer, with the clarification that financing, appraisal, inspection, title, escrow, and responsibilities of both parties may affect it.
+- Calculated contract-to-close days only when both dates exist and `CloseDate` is on or after `PurchaseContractDate`. Other records remain preserved with a missing metric.
+- Revalidated the existing `purchase_after_close_flag` against the source dates with exact agreement.
+- Found 494,894 eligible records (99.91%) and 440 ineligible records: 197 missing purchase-contract dates and 243 negative timelines; no close dates are missing.
+- Among eligible records, median contract-to-close time is 29 days and mean time is 31.64 days. The 1st-to-99th-percentile range is 0 to 117 days, and 8,899 valid records have a zero-day difference.
+- Preserved the 36,629-day maximum for Week 7 investigation rather than deleting it during feature engineering.
+- The private Week 6 output now contains 91 columns and still preserves all 495,334 sold records.
+- Updated the Week 6 notebook with eligibility, source-date quality, a central-distribution chart, and analyst interpretation prompts for contract-to-close time.
+- Refined the contract-to-close interpretation: a 29-day median means half of eligible transactions closed within 29 days after the accepted purchase contract and half took 29 days or longer.
+- Received the official California School District Areas 2024–25 shapefile under the Git-ignored `data/raw/DistrictArea2425/` directory.
+- Confirmed the shapefile contains 937 polygons in EPSG:3857: 516 elementary, 76 high-school, and 345 unified district areas. Seven invalid source geometries were repaired successfully before matching.
+- Added GeoPandas 1.2.0 to the project dependencies for reproducible coordinate transformation, geometry repair, and point-in-polygon matching.
+- Chose six separate output fields—name and official `CDCode` for elementary, high-school, and unified districts—because elementary/high boundaries overlap by design and some points also intersect unified boundaries.
+- Used the existing Week 4–5 `invalid_coordinates_flag` as the spatial eligibility rule. All 4,912 invalid-coordinate records remain preserved with missing district fields.
+- Spatially matched 490,422 coordinate-eligible sold records after transforming MLS WGS84 longitude/latitude points into the district layer's Web Mercator coordinate system.
+- Found 121,334 unique elementary matches, 118,883 unique high-school matches, and 370,946 unique unified matches. No record had multiple matches within the same district type.
+- Found only 142 coordinate-eligible records without any district match. Preserved 2,000 records with a unified match plus an elementary or high-school match across their separate columns rather than arbitrarily discarding a district.
+- Preserved leading zeros in official seven-digit district codes by treating all district name/code outputs as strings during saved-output validation.
+- Independently reran the complete spatial join after saving and confirmed all six district fields exactly reproduce from the shapefile.
+- The private Week 6 output now contains 97 columns: 85 input columns, six new metric columns, and six school-district enrichment columns. All 495,334 sold records remain preserved.
+- Updated the Week 6 notebook with aggregate district coverage, geometry-repair counts, unmatched and overlap counts, interpretation limits, and no row-level coordinates or identifiers.
+- Cross-checked the official Week 6 handbook: the deliverable requires the engineered-metrics script, a sample populated output table, and at least one segment summary grouped by `PropertyType` or `CountyOrParish`.
+- Confirmed `PropertyType` is constant (`Residential`) in the analysis-ready dataset, so it cannot produce a meaningful comparison.
+- With analyst approval, implemented three descriptive segment tables: `PropertySubType`, `CountyOrParish`, and `MLSAreaMajor`.
+- Applied one transparent presentation rule to all three tables: retain groups with at least 100 sold records. Every table reports record counts, valid-record denominators, and medians for close price, PPSF, close-to-original-list ratio, Days on Market, listing-to-contract days, and contract-to-close days.
+- Saved the complete private summaries as `data/processed/week6_segment_property_subtype.csv`, `data/processed/week6_segment_county.csv`, and `data/processed/week6_segment_mls_area.csv`; all remain covered by the repository's data ignore rule.
+- Segment coverage: 11 of 20 PropertySubType values, 44 of 63 CountyOrParish values, and 598 of 1,097 MLSAreaMajor values meet the 100-record threshold. PropertySubType has 923 missing records; CountyOrParish has none.
+- Documented the MLSAreaMajor limitation explicitly: 67,273 records are missing and 50,310 contain `699 - Not Defined`. The undefined category remains counted for quality reporting but is excluded from the notebook's defined-area comparison.
+- Added a safe synthetic sample-output table to the Week 6 notebook so every engineered metric can be seen populated without committing any private row-level MLS data.
+- Added presentation tables for all 11 qualifying property subtypes, the 15 largest counties, and the 15 largest defined MLS areas. The full private tables remain available for deeper local analysis.
+- The Week 6 technical requirements are complete. Analyst interpretation of the three segment tables and the final Week 6 written report remain deferred so the findings can be developed collaboratively rather than written on the analyst's behalf.
