@@ -198,4 +198,11 @@
 - Documented the MLSAreaMajor limitation explicitly: 67,273 records are missing and 50,310 contain `699 - Not Defined`. The undefined category remains counted for quality reporting but is excluded from the notebook's defined-area comparison.
 - Added a safe synthetic sample-output table to the Week 6 notebook so every engineered metric can be seen populated without committing any private row-level MLS data.
 - Added presentation tables for all 11 qualifying property subtypes, the 15 largest counties, and the 15 largest defined MLS areas. The full private tables remain available for deeper local analysis.
-- The Week 6 technical requirements are complete. Analyst interpretation of the three segment tables and the final Week 6 written report remain deferred so the findings can be developed collaboratively rather than written on the analyst's behalf.
+- Completed the segment interpretation collaboratively in Bowen's own words, then refined the language for technical precision without changing the analyst's conclusions.
+- Documented the PropertySubType finding: condominiums have the lowest median total price but the highest median PPSF among the three primary housing forms, take the longest to sell, and typically close 1.52% below original asking price.
+- Documented the county finding: Orange leads the five largest county groups in median price and PPSF, while Riverside has the lowest PPSF and longest median selling time; the notebook distinguishes dataset coverage from total market size and avoids unsupported claims about resident wealth.
+- Documented the MLS-area finding: Corona leads the five largest defined areas in median price and PPSF, Riverside has the shortest median Days on Market, and fragmented/missing MLS-area labels make this field more appropriate for drill-down than statewide summary.
+- Clarified that a median ratio of 1.0000 does not mean every property sold at original asking price and that missing ratios remain missing rather than being converted to zero.
+- Replaced the remaining listing-to-contract and contract-to-close interpretation prompts with Bowen's approved explanations of their 25-day and 29-day medians.
+- Created `reports/week6_market_metrics_report.md`, consolidating the handbook checklist, metric definitions and eligibility, statewide findings, school-district coverage, Bowen's segment interpretations, limitations, reproducible artifacts, and Week 7 handoff.
+- Week 6 is complete and ready for supervisor review. The next project phase is Week 7 outlier detection and data quality.
